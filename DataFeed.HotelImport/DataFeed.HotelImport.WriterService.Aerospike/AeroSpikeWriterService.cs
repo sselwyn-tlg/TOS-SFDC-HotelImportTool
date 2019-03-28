@@ -46,7 +46,13 @@ namespace DataFeed.HotelImport.WriterService.Aerospike
 
             foreach (var entity in entities)
             {
-                _logger.LogDebug($"AeroSpike: Saving Entity {++count}.....");
+                _logger.LogInformation($"AeroSpike: BEFORE Saving Entity {++count}.....");
+
+                _logger.LogInformation($"AeroSpike: Get Clarifi ID based on GDS Property Code...");
+
+                _logger.LogInformation($"AeroSpike: Save Select data as new column for that Clarifi Id record.");
+
+                _logger.LogInformation($"AeroSpike: AFTER Saving Entity {count}.....");
 
                 Task.Delay(250);
             }

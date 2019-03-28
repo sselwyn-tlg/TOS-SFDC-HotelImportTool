@@ -9,7 +9,7 @@ namespace DataFeed.HotelImport.Entities.Source
     {
         [StringLength(18)]
         [Description("Record ID")]
-        public int? Id { get; set; }
+        public string Id { get; set; }
 
         [Description("Deleted")]
         public bool? IsDeleted { get; set; }

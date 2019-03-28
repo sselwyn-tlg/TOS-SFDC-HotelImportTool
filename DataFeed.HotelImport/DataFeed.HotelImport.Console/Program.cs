@@ -1,7 +1,9 @@
 ﻿using DataFeed.MetaData.Core;
 using DataFeed.Processor.Api;
 using DataFeed.Processor.Core;
+using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using System;
 using System.IO;
 using System.Threading;
@@ -26,6 +28,8 @@ namespace DataFeed.HotelImport.Console
                     // Load the configuration settings
                     var configuration = ConfigHelper.LoadConfiguration(currentDirectory);
 
+                    
+
                     // Add services
                     var services = new ProcessorServices(configuration);
 
@@ -42,18 +46,45 @@ namespace DataFeed.HotelImport.Console
 
         static async Task Main(string[] args)
         {
-            var serviceProvider = await CreateServiceProvider(Directory.GetCurrentDirectory());
-
-            var processor = serviceProvider.GetService<IDataProcessor>();
-
-            var job = CreateJob("");
-
-            if (job == null)
+            try
             {
-                throw new ArgumentException("The queue item is not a valid job instance.", "myQueueItem");
-            }
+                var app = new CommandLineApplication(throwOnUnexpectedArg: true)
+                {
+                    FullName = "Data Feed Hotel Import",
+                    Name = "dotnet DataFeed.HotelImport.Console.dll"
+                };
 
-            await processor.ProcessAsync(job);
+                app.HelpOption(template: "-h | -? | --help ");
+
+                var serviceProvider = await CreateServiceProvider(Directory.GetCurrentDirectory());
+
+                app.OnExecute(async () =>
+                {
+                    var processor = serviceProvider.GetService<IDataProcessor>();
+
+                    var job = CreateJob("");
+
+                    if (job == null)
+                    {
+                        throw new ArgumentException("The queue item is not a valid job instance.", "myQueueItem");
+                    }
+
+                    await processor.ProcessAsync(job);
+
+                    return 0;
+                });
+
+                app.Execute(args);
+            }
+            catch (Exception e)
+            {
+                //Console.WriteLine(e.GetBaseException().Message);
+                System.Console.WriteLine(e);
+            }
+            finally
+            {
+                System.Console.WriteLine("Done!");
+            }
         }
 
         private static Job CreateJob(string args)
@@ -69,7 +100,7 @@ namespace DataFeed.HotelImport.Console
                 {
                     ApiFormat = args,
                     ApiBaseURL = "https://travelleaders.my.salesforce.com/",
-                    ApiUrl = "/services/data/v20.0/query",
+                    ApiUrl = "services/data/v20.0/query",
                     ApiUrlParameters = new System.Collections.Generic.Dictionary<string, string>(),
                     SourceDatabaseOptions = new DatabaseCommandFormat()
                     {

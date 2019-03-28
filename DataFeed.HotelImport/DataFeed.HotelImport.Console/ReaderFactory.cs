@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace DataFeed.HotelImport.Console
 {
@@ -60,13 +61,18 @@ namespace DataFeed.HotelImport.Console
             return CreateSalesForceReader<Entities.Source.Hotel__c>(parameters, importSettings);
         }
 
+        protected override Task<ApiSecretKey> GetApiSecretKeyAsync(int consumerID)
+        {
+            return Task.FromResult<ApiSecretKey>(null);
+        }
+
         private IReaderService CreateSalesForceReader<T>
             (ImportParameters inputParameters, ImportSettings importSettings)
             where T : BaseEntity, new()
         {
             var settings = CreateOAuthWebApiReaderSettings<SalesForceReaderSettings<T>>(inputParameters, importSettings, null);
             settings.ApiBaseUrl = _salesForceSettings.SalesForceApiBaseUrl;
-            settings.ApiUrl = _salesForceSettings.SalesForceApiUrl;
+            settings.ApiUrl = importSettings.ApiUrl;
             settings.AuthorizationURL = _salesForceSettings.SalesForceAuthorizationURL;
             settings.ClientID = _salesForceSettings.SalesForceClientID;
             settings.ClientSecret = _salesForceSettings.SalesForceClientSecret;

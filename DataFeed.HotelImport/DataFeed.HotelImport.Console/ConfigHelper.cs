@@ -45,6 +45,11 @@ namespace DataFeed.HotelImport.Console
                             .AddEnvironmentVariables()
                             .Build();
 
+                        // Add Azure Key Vault to pull configuration values from the vault (overriding any JSON values already set)
+                        var azureServiceTokenProvider = new AzureServiceTokenProvider();
+                        var keyVaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback));
+                        builder.AddAzureKeyVault(config["AppSettings:KeyVaultUri"], keyVaultClient, new DefaultKeyVaultSecretManager());
+
                         // Add the JSON configuration values again (overriding any values from the vault for local development)
                         builder.AddJsonFile("appSettings.json", false, true);
 
